@@ -1,0 +1,5 @@
+.left-bar {
+    width: 500px;
+    height: 100vh;
+    overflow: auto;
+}
