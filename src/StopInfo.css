@@ -1,0 +1,10 @@
+.routes {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+.route {
+    font-size: 13px;
+    padding: 0px;
+    margin: 0px;
+}

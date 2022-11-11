@@ -1,23 +1,22 @@
-import Map from './Map'
-import './App.css'
-import LeftBar from './LeftBar'
-import { SetStateAction, useState } from 'react'
+import Mapy from "./Mapy";
+import "./App.css";
+import LeftBar from "./LeftBar";
+import { SetStateAction, useState } from "react";
 
 export interface StopsState {
-  setStops?: SetStateAction<any>,
-  stops?: any
+    setStops?: SetStateAction<any>;
+    stops?: any;
 }
 
 function App() {
+    const [stops, setstops] = useState<any>();
 
-  const [stops, setstops] = useState<any>()
-
-  return (
-    <div className="App">
-      <Map setStops={setstops} />
-      <LeftBar stops={stops} />
-    </div>
-  )
+    return (
+        <div className="App">
+            <Mapy setStops={setstops} />
+            <LeftBar stops={stops} />
+        </div>
+    );
 }
 
-export default App
+export default App;

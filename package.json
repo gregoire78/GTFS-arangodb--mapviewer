@@ -5,22 +5,27 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "update:check": "npx npm-check-updates",
+    "update:upgrade": "npx npm-check-updates -u",
+    "prettier": "npx prettier --config .prettierrc.toml --write vite.config.ts src/*.{ts,tsx} src/**/*.{ts,tsx}"
   },
   "dependencies": {
-    "axios": "^0.27.2",
-    "luxon": "^2.4.0",
-    "maplibre-gl": "^2.1.9",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "axios": "^1.1.3",
+    "luxon": "^3.1.0",
+    "mapbox-gl": "npm:empty-npm-package@^1.0.0",
+    "maplibre-gl": "^2.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-map-gl": "^7.0.19"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
-    "@types/luxon": "^2.3.2",
-    "@types/react": "^18.0.0",
-    "@types/react-dom": "^18.0.0",
-    "@vitejs/plugin-react": "^1.3.0",
-    "typescript": "^4.6.3",
-    "vite": "^2.9.9"
+    "@types/luxon": "^3.1.0",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.8",
+    "@vitejs/plugin-react": "^2.2.0",
+    "typescript": "^4.8.4",
+    "vite": "^3.2.3"
   }
 }
