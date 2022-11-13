@@ -1,3 +1,13 @@
+.button-route {
+    font-size: 15px;
+    width: 100%;
+    border: none;
+    margin-block-start: 5px;
+    cursor: pointer;
+}
+.button-route:hover {
+    opacity: .8;
+}
 .routes {
     display: flex;
     flex-wrap: wrap;
@@ -7,4 +17,8 @@
     font-size: 13px;
     padding: 0px;
     margin: 0px;
+}
+.logo {
+    vertical-align: bottom;
+    height: 15px;
 }

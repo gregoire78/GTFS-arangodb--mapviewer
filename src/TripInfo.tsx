@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useState } from "react";
+import "./tripInfo.css";
 
 export default function TripInfo({ trip, stop }: any) {
     const [stopTimes, seStopTimes] = useState<any>();
@@ -10,11 +11,12 @@ export default function TripInfo({ trip, stop }: any) {
     };
     return (
         <div>
-            <div style={{ backgroundColor: trip.color, color: trip.textColor }}>
-                {trip.longName} - {trip.service}
-            </div>
-            <button style={{ fontSize: 14, width: "100%" }} onClick={async () => handleStopTimes(trip.id)}>
-                {trip.headsign}
+            <button
+                className="button-trip"
+                style={{ backgroundColor: trip.color, color: trip.textColor }}
+                onClick={async () => handleStopTimes(trip.id)}
+            >
+                {trip.longName} - {trip.service} - {trip.headsign}
             </button>
             <div style={{ display: "grid", justifyContent: "center" }}>
                 {stopTimes &&

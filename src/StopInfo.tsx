@@ -2,6 +2,12 @@ import axios from "axios";
 import React, { useState } from "react";
 import TripInfo from "./TripInfo";
 import "./StopInfo.css";
+import rer from "./RER.svg";
+import metro from "./metro.svg";
+import train from "./train.svg";
+import ter from "./terr.svg";
+import bus from "./bus.svg";
+import tram from "./tram.svg";
 
 export default function StopInfo({ stop, date }: any) {
     const [trips, setTrips] = useState<any>();
@@ -14,17 +20,33 @@ export default function StopInfo({ stop, date }: any) {
         setTrips(res.data);
         return res.data;
     };
+
+    const type = (t: number, agency: string) => {
+        switch (t) {
+            case 0:
+                return <img src={tram} className="logo" />;
+            case 1:
+                return <img src={metro} className="logo" />;
+            case 2:
+                if (agency === "RER") {
+                    return <img src={rer} className="logo" />;
+                }
+                if (agency === "Transilien") {
+                    return <img src={train} className="logo" />;
+                }
+                if (agency === "TER") {
+                    return <img src={ter} className="logo" />;
+                }
+                break;
+            case 3:
+                return <img src={bus} className="logo" />;
+            default:
+                break;
+        }
+    };
     return (
         <div>
-            <button
-                style={{
-                    fontSize: 15,
-                    width: "100%",
-                    border: "none",
-                    marginBlockStart: 5,
-                }}
-                onClick={async () => handleTrips(stop._key)}
-            >
+            <button className="button-route" onClick={async () => handleTrips(stop._key)}>
                 {stop.name}
                 <div className="routes">
                     {stop.routes.map((r: any, i: number) => (
@@ -36,7 +58,7 @@ export default function StopInfo({ stop, date }: any) {
                                 color: r.textColor,
                             }}
                         >
-                            {r.agency} {r.shortName}
+                            {type(r.type, r.agency)} {r.shortName}
                         </p>
                     ))}
                 </div>

@@ -12,6 +12,7 @@ import train from "./train.svg";
 import ter from "./terr.svg";
 import bus from "./bus.svg";
 import target from "./target.svg";
+import tram from "./tram.svg";
 
 const API_KEY = import.meta.env.VITE_MAPTILER_KEY;
 
@@ -49,27 +50,59 @@ export default function Mapy({ setStops }: StopsState) {
                     //setPopupInfo(city);
                 }}
             >
-                {stop.routes.map((r: any, i: number) => {
-                    switch (r.type) {
-                        case 1:
-                            return <img key={i} src={metro} height={25} />;
-                        case 2:
-                            if (r.agency === "RER") {
-                                return <img key={i} src={rer} height={25} />;
-                            }
-                            if (r.agency === "Transilien") {
-                                return <img key={i} src={train} height={25} />;
-                            }
-                            if (r.agency === "TER") {
-                                return <img key={i} src={ter} width={25} />;
-                            }
-                            break;
-                        case 3:
-                            return <img key={i} src={bus} height={25} />;
-                        default:
-                            return <Pin key={i} />;
-                    }
-                })}
+                <div className="pin" style={{ cursor: "pointer" }} title={stop.name}>
+                    {stop.routes.map((r: any, i: number) => {
+                        switch (r.type) {
+                            case 0:
+                                return (
+                                    <div key={i} style={{ display: "flex" }}>
+                                        <img src={tram} height={25} />
+                                        <div className="tram" style={{ borderBlock: `solid 4px ${r.color}` }}>
+                                            {r.shortName}
+                                        </div>
+                                    </div>
+                                );
+                            case 1:
+                                return (
+                                    <div key={i} style={{ display: "flex" }}>
+                                        <img src={metro} height={25} />
+                                        <div className="metro" style={{ backgroundColor: r.color, color: r.textColor }}>
+                                            {r.shortName}
+                                        </div>
+                                    </div>
+                                );
+                            case 2:
+                                if (r.agency === "RER") {
+                                    return (
+                                        <div key={i} style={{ display: "flex" }}>
+                                            <img src={rer} height={25} />
+                                            <div className="rer" style={{ backgroundColor: r.color, color: r.textColor }}>
+                                                {r.shortName}
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                                if (r.agency === "Transilien") {
+                                    return (
+                                        <div key={i} style={{ display: "flex" }}>
+                                            <img src={train} height={25} />
+                                            <div className="train" style={{ backgroundColor: r.color, color: r.textColor }}>
+                                                {r.shortName}
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                                if (r.agency === "TER") {
+                                    return <img key={i} src={ter} width={25} alt={stop.name} />;
+                                }
+                                break;
+                            case 3:
+                                return <img key={i} className="bus" src={bus} height={20} alt={stop.name} />;
+                            default:
+                                return <Pin key={i} />;
+                        }
+                    })}
+                </div>
             </Marker>
         ));
     }, [markers]);
