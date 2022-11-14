@@ -13,6 +13,7 @@ import ter from "./terr.svg";
 import bus from "./bus.svg";
 import target from "./target.svg";
 import tram from "./tram.svg";
+import funi from "./funi.svg";
 
 const API_KEY = import.meta.env.VITE_MAPTILER_KEY;
 
@@ -98,6 +99,8 @@ export default function Mapy({ setStops }: StopsState) {
                                 break;
                             case 3:
                                 return <img key={i} className="bus" src={bus} height={20} alt={stop.name} />;
+                            case 7:
+                                return <img key={i} src={funi} width={25} alt={stop.name} />;
                             default:
                                 return <Pin key={i} />;
                         }

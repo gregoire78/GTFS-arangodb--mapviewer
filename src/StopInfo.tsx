@@ -8,6 +8,7 @@ import train from "./train.svg";
 import ter from "./terr.svg";
 import bus from "./bus.svg";
 import tram from "./tram.svg";
+import funi from "./funi.svg";
 
 export default function StopInfo({ stop, date }: any) {
     const [trips, setTrips] = useState<any>();
@@ -40,6 +41,8 @@ export default function StopInfo({ stop, date }: any) {
                 break;
             case 3:
                 return <img src={bus} className="logo" />;
+            case 7:
+                return <img src={funi} className="logo" />;
             default:
                 break;
         }

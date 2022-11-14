@@ -14,11 +14,14 @@
     justify-content: space-evenly;
 }
 .route {
-    font-size: 13px;
-    padding: 0px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 15px;
     margin: 0px;
+    padding-inline: 3px;
 }
 .logo {
-    vertical-align: bottom;
-    height: 15px;
+    padding-inline-end: 3px;
+    height: 23px;
 }
