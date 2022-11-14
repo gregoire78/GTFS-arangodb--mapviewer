@@ -16,7 +16,7 @@ export default function TripInfo({ trip, stop }: any) {
                 style={{ backgroundColor: trip.color, color: trip.textColor }}
                 onClick={async () => handleStopTimes(trip.id)}
             >
-                {trip.longName} - {trip.service} - {trip.headsign}
+                {trip.departureTime.slice(0, -3)} - {trip.longName} - {trip.service} - {trip.headsign}
             </button>
             <div style={{ display: "grid", justifyContent: "center" }}>
                 {stopTimes &&
