@@ -1,7 +1,17 @@
 import { useState, useMemo } from "react";
 import maplibregl from "maplibre-gl";
 import axios from "axios";
-import { FullscreenControl, GeolocateControl, Map, Marker, NavigationControl, ScaleControl } from "react-map-gl";
+import {
+    FullscreenControl,
+    GeoJSONSource,
+    GeolocateControl,
+    Layer,
+    Map,
+    Marker,
+    NavigationControl,
+    ScaleControl,
+    Source,
+} from "react-map-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./map.css";
 import { StopsState } from "./App";
@@ -19,6 +29,7 @@ const API_KEY = import.meta.env.VITE_MAPTILER_KEY;
 
 export default function Mapy({ setStops }: StopsState) {
     const [markers, setMarkers] = useState<Set<any> | null>(null);
+    const [zoom, setZoom] = useState<number>(15);
 
     const getStops = async (lat: number, lng: number) => {
         const res = await axios.get(import.meta.env.VITE_API, {
@@ -98,7 +109,8 @@ export default function Mapy({ setStops }: StopsState) {
                                 }
                                 break;
                             case 3:
-                                return <img key={i} className="bus" src={bus} height={20} alt={stop.name} />;
+                                return null;
+                            //return <img key={i} className="bus" src={bus} height={20} alt={stop.name} />;
                             case 7:
                                 return <img key={i} src={funi} width={25} alt={stop.name} />;
                             default:
@@ -117,7 +129,7 @@ export default function Mapy({ setStops }: StopsState) {
                 initialViewState={{
                     latitude: 48.870440981418454,
                     longitude: 2.31674525603746,
-                    zoom: 15,
+                    zoom: zoom,
                     bearing: 0,
                     pitch: 0,
                 }}
@@ -127,6 +139,7 @@ export default function Mapy({ setStops }: StopsState) {
                     const stops = await getStops(lat, lng);
                     setMarkers(stops);
                 }}
+                onZoomEnd={(z) => setZoom(z.target.getZoom())}
                 onMoveEnd={async (e) => {
                     if (!markers) {
                         return;
@@ -135,12 +148,111 @@ export default function Mapy({ setStops }: StopsState) {
                     const stops = await getStops(lat, lng);
                     setMarkers(stops);
                 }}
+                onClick={(event) => {
+                    if (!event.features) return;
+                    const feature = event.features[0];
+                    if (!feature) return;
+                    const clusterId = feature.properties?.cluster_id;
+
+                    const mapboxSource = event.target.getSource("earthquakes") as GeoJSONSource;
+
+                    mapboxSource.getClusterExpansionZoom(clusterId, (err, zoom) => {
+                        if (err) {
+                            return;
+                        }
+                        event.target.easeTo({
+                            center: feature.geometry.coordinates,
+                            zoom,
+                            duration: 500,
+                        });
+                    });
+                }}
+                interactiveLayerIds={["clusters"]}
             >
                 <GeolocateControl position="top-right" />
                 <FullscreenControl position="top-right" />
                 <NavigationControl position="top-right" />
                 <ScaleControl />
                 {pins}
+                {markers && (
+                    <Source
+                        id="earthquakes"
+                        type="geojson"
+                        data={
+                            markers && {
+                                type: "FeatureCollection",
+                                features: [...markers].map((s: any) => {
+                                    return {
+                                        type: "Feature",
+                                        properties: { id: s._key, name: s.name },
+                                        geometry: { type: "Point", coordinates: [s.lon, s.lat, 0.0] },
+                                    };
+                                }),
+                            }
+                        }
+                        cluster={true}
+                        clusterMaxZoom={14}
+                        clusterRadius={50}
+                    >
+                        <Layer
+                            {...{
+                                id: "clusters",
+                                type: "circle",
+                                source: "earthquakes",
+                                filter: ["has", "point_count"],
+                                paint: {
+                                    //"circle-color": ["step", ["get", "point_count"], "#51bbd6", 5, "#f1f075", 10, "#f28cb1"],
+                                    "circle-color": "#51bbd6",
+                                    "circle-stroke-width": 1,
+                                    "circle-stroke-color": "#fff",
+                                    "circle-radius": ["step", ["get", "point_count"], 10, 100, 15, 750, 20],
+                                },
+                            }}
+                        />
+                        <Layer
+                            {...{
+                                id: "cluster-count",
+                                type: "symbol",
+                                source: "earthquakes",
+                                filter: ["has", "point_count"],
+                                layout: {
+                                    "text-field": "{point_count_abbreviated}",
+                                    "text-font": ["Ubuntu"],
+                                    "text-size": 12,
+                                },
+                            }}
+                        />
+                        <Layer
+                            {...{
+                                id: "unclustered-point",
+                                type: "circle",
+                                source: "earthquakes",
+                                filter: ["!", ["has", "point_count"]],
+                                paint: {
+                                    "circle-color": "#11b4da",
+                                    "circle-radius": 4,
+                                    "circle-stroke-width": 1,
+                                    "circle-stroke-color": "#fff",
+                                },
+                            }}
+                        />
+                        <Layer
+                            {...{
+                                id: "unclustered-point-text",
+                                type: "symbol",
+                                source: "earthquakes",
+                                filter: ["!", ["has", "point_count"]],
+                                layout: {
+                                    "text-anchor": "top",
+                                    "text-field": "{name}",
+                                    "text-font": ["Ubuntu"],
+                                    "text-size": 10,
+                                    "text-offset": [0, 0.5],
+                                },
+                            }}
+                        />
+                    </Source>
+                )}
             </Map>
             <div
                 style={{
