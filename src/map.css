@@ -31,16 +31,25 @@
     align-items: center;
 }
 .bus {
+    font-family: "Ubuntu", sans-serif;
+    min-width: 25px;
+    height: 25px;
+    font-size: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+/* .bus {
     opacity: .7;
 }
 .bus:hover {
     opacity: 1;
-}
+} */
 .tram {
     font-family: "Ubuntu", sans-serif;
     background-color: white;
     height: 17px;
-    width: 25px;
+    min-width: 25px;
     font-size: 15px;
     display: flex;
     justify-content: center;

@@ -62,7 +62,7 @@ export default function Mapy({ setStops }: StopsState) {
                         features: [...markers].map((s: any) => {
                             return {
                                 type: "Feature",
-                                properties: { id: s._key, name: s.name, routes: s.routes },
+                                properties: { id: s._key, name: s.name, routes: s.routes, STORE_TYPE: `${s.routes[0].type}` },
                                 geometry: { type: "Point", coordinates: [s.lon, s.lat, 0.0] },
                             };
                         }),
@@ -102,6 +102,34 @@ export default function Mapy({ setStops }: StopsState) {
                 />
                 <Layer
                     {...{
+                        id: "unclustered-point-type",
+                        type: "circle",
+                        source: "earthquakes",
+                        filter: ["!", ["has", "point_count"]],
+                        paint: {
+                            "circle-color": [
+                                "match",
+                                ["get", "STORE_TYPE"],
+                                "0",
+                                "blue",
+                                "1",
+                                "#FF8C00",
+                                "2",
+                                "red",
+                                "3",
+                                "#9ACD32",
+                                "7",
+                                "#008000",
+                                "#FF0000",
+                            ],
+                            "circle-radius": 8.5,
+                            "circle-stroke-width": 1,
+                            "circle-stroke-color": "#fff",
+                        },
+                    }}
+                />
+                <Layer
+                    {...{
                         id: "unclustered-point",
                         type: "circle",
                         source: "earthquakes",
@@ -121,11 +149,12 @@ export default function Mapy({ setStops }: StopsState) {
                         source: "earthquakes",
                         filter: ["!", ["has", "point_count"]],
                         layout: {
+                            "text-allow-overlap": false,
                             "text-anchor": "top",
                             "text-field": "{name}",
                             "text-font": ["Ubuntu"],
                             "text-size": 10,
-                            "text-offset": [0, 0.5],
+                            "text-offset": [0, 1],
                         },
                     }}
                 />
@@ -270,7 +299,6 @@ export default function Mapy({ setStops }: StopsState) {
                 <FullscreenControl position="top-right" />
                 <NavigationControl position="top-right" />
                 <ScaleControl />
-                {pins}
                 {sources}
                 {popup && (
                     <Popup longitude={popup.lon} latitude={popup.lat} anchor="bottom" onClose={() => setPopup(null)}>
@@ -316,18 +344,29 @@ export default function Mapy({ setStops }: StopsState) {
                                         );
                                     }
                                     if (r.agency === "TER") {
-                                        return <img key={r.id} src={ter} width={25} alt={stop.name} />;
+                                        return <img key={r.id} src={ter} width={25} />;
                                     }
                                     break;
                                 case 3:
                                     return (
                                         <div key={r.id} style={{ display: "flex" }}>
-                                            <img src={bus} height={25} alt={stop.name} />
+                                            <img src={bus} height={25} />
                                             <div className="bus" style={{ backgroundColor: r.color, color: r.textColor }}>
                                                 {r.shortName}
                                             </div>
                                         </div>
                                     );
+                                case 7:
+                                    return (
+                                        <div key={r.id} style={{ display: "flex" }}>
+                                            <img src={funi} height={25} />
+                                            <div className="bus" style={{ backgroundColor: r.color, color: r.textColor }}>
+                                                {r.shortName}
+                                            </div>
+                                        </div>
+                                    );
+                                default:
+                                    return null;
                             }
                         })}
                     </Popup>
