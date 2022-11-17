@@ -6,8 +6,9 @@ import {
     GeoJSONSource,
     GeolocateControl,
     Layer,
+    LngLatLike,
     Map,
-    Marker,
+    MapLayerMouseEvent,
     NavigationControl,
     Popup,
     ScaleControl,
@@ -16,7 +17,6 @@ import {
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./map.css";
 import { StopsState } from "./App";
-import Pin from "./Pin";
 import rer from "./RER.svg";
 import metro from "./metro.svg";
 import train from "./train.svg";
@@ -32,7 +32,6 @@ export default function Mapy({ setStops }: StopsState) {
     const [markers, setMarkers] = useState<Set<any> | null>(null);
     const [zoom, setZoom] = useState<number>(15);
     const [popup, setPopup] = useState<any>();
-    const map = useRef<any>();
 
     const getStops = async (lat: number, lng: number) => {
         const res = await axios.get(import.meta.env.VITE_API, {
@@ -54,18 +53,18 @@ export default function Mapy({ setStops }: StopsState) {
         if (!markers) return;
         return (
             <Source
-                id="earthquakes"
+                id="mymap"
                 type="geojson"
                 data={
                     markers && {
                         type: "FeatureCollection",
-                        features: [...markers].map((s: any) => {
-                            return {
+                        features: [...markers].map(
+                            (s: any): GeoJSON.Feature<GeoJSON.Point> => ({
                                 type: "Feature",
                                 properties: { id: s._key, name: s.name, routes: s.routes, STORE_TYPE: `${s.routes[0].type}` },
                                 geometry: { type: "Point", coordinates: [s.lon, s.lat, 0.0] },
-                            };
-                        }),
+                            })
+                        ),
                     }
                 }
                 cluster={true}
@@ -76,7 +75,7 @@ export default function Mapy({ setStops }: StopsState) {
                     {...{
                         id: "clusters",
                         type: "circle",
-                        source: "earthquakes",
+                        source: "mymap",
                         filter: ["has", "point_count"],
                         paint: {
                             //"circle-color": ["step", ["get", "point_count"], "#51bbd6", 5, "#f1f075", 10, "#f28cb1"],
@@ -91,7 +90,7 @@ export default function Mapy({ setStops }: StopsState) {
                     {...{
                         id: "cluster-count",
                         type: "symbol",
-                        source: "earthquakes",
+                        source: "mymap",
                         filter: ["has", "point_count"],
                         layout: {
                             "text-field": "{point_count_abbreviated}",
@@ -104,7 +103,7 @@ export default function Mapy({ setStops }: StopsState) {
                     {...{
                         id: "unclustered-point-type",
                         type: "circle",
-                        source: "earthquakes",
+                        source: "mymap",
                         filter: ["!", ["has", "point_count"]],
                         paint: {
                             "circle-color": [
@@ -132,7 +131,7 @@ export default function Mapy({ setStops }: StopsState) {
                     {...{
                         id: "unclustered-point",
                         type: "circle",
-                        source: "earthquakes",
+                        source: "mymap",
                         filter: ["!", ["has", "point_count"]],
                         paint: {
                             "circle-color": "#11b4da",
@@ -146,7 +145,7 @@ export default function Mapy({ setStops }: StopsState) {
                     {...{
                         id: "unclustered-point-text",
                         type: "symbol",
-                        source: "earthquakes",
+                        source: "mymap",
                         filter: ["!", ["has", "point_count"]],
                         layout: {
                             "text-allow-overlap": false,
@@ -162,89 +161,37 @@ export default function Mapy({ setStops }: StopsState) {
         );
     }, [markers]);
 
-    const pins = useMemo(() => {
-        if (!map.current) return;
-        const g = map.current.querySourceFeatures("earthquakes").filter((v: any) => !v.id);
-        const set = new Set();
-        return g
-            .filter((o: any) => !set.has(o.properties?.id) && set.add(o.properties?.id))
-            .map((feature: any, i: number) => (
-                <Marker
-                    key={`marker-${feature.properties?.id}`}
-                    longitude={feature.geometry.coordinates[0]}
-                    latitude={feature.geometry.coordinates[1]}
-                    anchor="bottom"
-                    onClick={(e) => {
-                        // If we let the click event propagates to the map, it will immediately close the popup
-                        // with `closeOnClick: true`
-                        e.originalEvent.stopPropagation();
-                        //setPopupInfo(city);
-                    }}
-                >
-                    <div className="pin" style={{ cursor: "pointer" }} title={feature.properties?.name}>
-                        {JSON.parse(feature.properties?.routes).map((r: any) => {
-                            switch (r.type) {
-                                case 0:
-                                    return (
-                                        <div key={r.id} style={{ display: "flex" }}>
-                                            <img src={tram} height={25} />
-                                            <div className="tram" style={{ borderBlock: `solid 4px ${r.color}` }}>
-                                                {r.shortName}
-                                            </div>
-                                        </div>
-                                    );
-                                case 1:
-                                    return (
-                                        <div key={r.id} style={{ display: "flex" }}>
-                                            <img src={metro} height={25} />
-                                            <div className="metro" style={{ backgroundColor: r.color, color: r.textColor }}>
-                                                {r.shortName}
-                                            </div>
-                                        </div>
-                                    );
-                                case 2:
-                                    if (r.agency === "RER") {
-                                        return (
-                                            <div key={r.id} style={{ display: "flex" }}>
-                                                <img src={rer} height={25} />
-                                                <div className="rer" style={{ backgroundColor: r.color, color: r.textColor }}>
-                                                    {r.shortName}
-                                                </div>
-                                            </div>
-                                        );
-                                    }
-                                    if (r.agency === "Transilien") {
-                                        return (
-                                            <div key={r.id} style={{ display: "flex" }}>
-                                                <img src={train} height={25} />
-                                                <div className="train" style={{ backgroundColor: r.color, color: r.textColor }}>
-                                                    {r.shortName}
-                                                </div>
-                                            </div>
-                                        );
-                                    }
-                                    if (r.agency === "TER") {
-                                        return <img key={r.id} src={ter} width={25} alt={feature.properties?.name} />;
-                                    }
-                                    break;
-                                case 3:
-                                    return null;
-                                //return <img key={i} className="bus" src={bus} height={20} alt={stop.name} />;
-                                case 7:
-                                    return <img key={r.id} src={funi} width={25} alt={feature.properties?.name} />;
-                                default:
-                                    return <Pin key={r.id} />;
-                            }
-                        })}
-                    </div>
-                </Marker>
-            ));
-    }, [markers]);
+    const handleOnClickStop = (event: MapLayerMouseEvent) => {
+        if (!event.features) return;
+        const feature = event.features[0];
+        if (!feature) return;
+        const geo = feature.geometry as GeoJSON.Point;
+        if (feature.layer.id === "unclustered-point-text" || feature.layer.id === "unclustered-point") {
+            setPopup({
+                lon: geo.coordinates[0],
+                lat: geo.coordinates[1],
+                routes: JSON.parse(feature.properties?.routes),
+            });
+            return;
+        }
+        const clusterId = feature.properties?.cluster_id;
+        const mapboxSource = event.target.getSource("mymap") as GeoJSONSource;
+        mapboxSource.getClusterExpansionZoom(clusterId, (err, zoom) => {
+            if (err) {
+                return;
+            }
+            event.target.easeTo({
+                center: geo.coordinates as LngLatLike,
+                zoom,
+                duration: 500,
+            });
+        });
+    };
 
     return (
         <div className="map-wrap">
             <Map
-                ref={map}
+                id="myMap"
                 mapLib={maplibregl}
                 initialViewState={{
                     latitude: 48.870440981418454,
@@ -268,31 +215,7 @@ export default function Mapy({ setStops }: StopsState) {
                     const stops = await getStops(lat, lng);
                     setMarkers(stops);
                 }}
-                onClick={(event) => {
-                    if (!event.features) return;
-                    const feature = event.features[0];
-                    if (!feature) return;
-                    if (feature.layer.id === "unclustered-point-text" || feature.layer.id === "unclustered-point") {
-                        setPopup({
-                            lon: feature.geometry.coordinates[0],
-                            lat: feature.geometry.coordinates[1],
-                            routes: JSON.parse(feature.properties?.routes),
-                        });
-                        return;
-                    }
-                    const clusterId = feature.properties?.cluster_id;
-                    const mapboxSource = event.target.getSource("earthquakes") as GeoJSONSource;
-                    mapboxSource.getClusterExpansionZoom(clusterId, (err, zoom) => {
-                        if (err) {
-                            return;
-                        }
-                        event.target.easeTo({
-                            center: feature.geometry.coordinates,
-                            zoom,
-                            duration: 500,
-                        });
-                    });
-                }}
+                onClick={handleOnClickStop}
                 interactiveLayerIds={["clusters", "unclustered-point-text", "unclustered-point"]}
             >
                 <GeolocateControl position="top-right" />

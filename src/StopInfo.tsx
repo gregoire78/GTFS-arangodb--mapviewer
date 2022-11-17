@@ -9,6 +9,7 @@ import ter from "./terr.svg";
 import bus from "./bus.svg";
 import tram from "./tram.svg";
 import funi from "./funi.svg";
+import { useMap } from "react-map-gl";
 
 export default function StopInfo({ stop, date }: any) {
     const [trips, setTrips] = useState<any>();
@@ -20,6 +21,12 @@ export default function StopInfo({ stop, date }: any) {
         });
         setTrips(res.data);
         return res.data;
+    };
+    const { myMap } = useMap();
+
+    const onClick = () => {
+        if (!myMap) return;
+        myMap.flyTo({ center: [stop.lon, stop.lat], zoom: 16 });
     };
 
     const type = (t: number, agency: string) => {
@@ -48,7 +55,10 @@ export default function StopInfo({ stop, date }: any) {
         }
     };
     return (
-        <div>
+        <div className="stop">
+            <button className="button-target" title="voler vers le point" onClick={onClick}>
+                go
+            </button>
             <button className="button-route" onClick={async () => handleTrips(stop._key)}>
                 {stop.name}
                 <div className="routes">
@@ -66,7 +76,7 @@ export default function StopInfo({ stop, date }: any) {
                     ))}
                 </div>
             </button>
-            {trips && trips.map((trip: any) => <TripInfo key={trip.id} trip={trip} stop={stop} />)}
+            <div>{trips && trips.map((trip: any) => <TripInfo key={trip.id} trip={trip} stop={stop} />)}</div>
         </div>
     );
 }

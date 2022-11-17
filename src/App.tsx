@@ -3,6 +3,7 @@ import "./App.css";
 import LeftBar from "./LeftBar";
 import { SetStateAction, useState } from "react";
 import "@fontsource/ubuntu";
+import { MapProvider } from "react-map-gl";
 
 export interface StopsState {
     setStops?: SetStateAction<any>;
@@ -11,11 +12,14 @@ export interface StopsState {
 
 function App() {
     const [stops, setstops] = useState<any>();
+    const [popup, setPopup] = useState<any>();
 
     return (
         <div className="App">
-            <Mapy setStops={setstops} />
-            <LeftBar stops={stops} />
+            <MapProvider>
+                <Mapy setStops={setstops} />
+                <LeftBar stops={stops} />
+            </MapProvider>
         </div>
     );
 }

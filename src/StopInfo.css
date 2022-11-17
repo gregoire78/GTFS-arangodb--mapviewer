@@ -2,7 +2,6 @@
     font-size: 15px;
     width: 100%;
     border: none;
-    margin-block-start: 5px;
     cursor: pointer;
 }
 .button-route:hover {
@@ -24,4 +23,16 @@
 .logo {
     padding-inline-end: 3px;
     height: 23px;
+}
+.stop {
+    margin-block-start: 5px;
+    display: grid;
+}
+.button-target {
+    cursor: pointer;
+    border: none;
+    background-color: #f8f4ec;
+}
+.button-target:hover {
+    opacity: .5;
 }
